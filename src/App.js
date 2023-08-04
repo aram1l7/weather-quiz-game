@@ -1,101 +1,119 @@
-import { Autocomplete, Box, TextField, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery } from "react-query";
+import { useNavigate } from "react-router-dom";
 
 function App() {
-  const [data, setData] = useState([]);
+  const getCountriesAndCities = async () => {
+    const { data } = await axios.get(
+      `https://countriesnow.space/api/v0.1/countries/capital`
+    );
 
-  useEffect(() => {
-    const getCountriesAndCities = async () => {
-      const { data } = await axios.get(
-        `https://countriesnow.space/api/v0.1/countries/capital`
-      );
+    const mainCountries = [
+      "Armenia",
+      "Georgia",
+      "France",
+      "Germany",
+      "Italy",
+      "Hungary",
+      "Bosnia and Herzegovina",
+      "Lithuania",
+      "United Kingdom",
+      "United States",
+      "Czech Republic",
+      "Russia",
+      "Egypt",
+      "United Arab Emirates",
+      "Greece",
+      "Romania",
+      "Ukraine",
+      "Moldova",
+      "Cyprus",
+      "Colombia",
+      "Cuba",
+      "Costa Rica",
+      "Urugway",
+      "Denmark",
+      "Monaco",
+      "New Zealand",
+      "Singapore",
+      "Spain",
+      "Sweden",
+      "Switzerland",
+      "Israel",
+      "Iraq",
+    ];
 
-      const mainCountries = [
-        "Armenia",
-        "Georgia",
-        "France",
-        "Germany",
-        "Italy",
-        "Hungary",
-        "Bosnia and Herzegovina",
-        "Lithuania",
-        "United Kingdom",
-        "United States",
-        "Czech Republic",
-        "Russia",
-        "Egypt",
-        "United Arab Emirates",
-        "Greece",
-        "Romania",
-        "Ukraine",
-        "Moldova",
-        "Cyprus",
-        "Colombia",
-        "Cuba",
-        "Costa Rica",
-        "Urugway",
-        "Denmark",
-        "Monaco",
-        "New Zealand",
-        "Singapore",
-        "Spain",
-        "Sweden",
-        "Switzerland",
-        "Israel",
-        "Iraq",
-      ];
+    const capitals = data.data
+      .filter((el) => mainCountries.includes(el.name))
+      .map((el) => el.capital);
 
-      const capitals = data.data
-        .filter((el) => mainCountries.includes(el.name))
-        .map((el) => el.capital);
+    const getRandomCapitals = () => {
+      // Create a Set to store unique capitals
+      const uniqueCapitals = new Set();
 
-      const getRandomCapitals = () => {
-        // Create a Set to store unique capitals
-        const uniqueCapitals = new Set();
+      // Continue adding random capitals until we have 5 unique ones
+      while (uniqueCapitals.size < 5) {
+        const randomIndex = Math.floor(Math.random() * capitals.length);
+        uniqueCapitals.add(capitals[randomIndex]);
+      }
 
-        // Continue adding random capitals until we have 5 unique ones
-        while (uniqueCapitals.size < 5) {
-          const randomIndex = Math.floor(Math.random() * capitals.length);
-          uniqueCapitals.add(capitals[randomIndex]);
-        }
+      // Convert the Set back to an array
+      const randomCapitals = Array.from(uniqueCapitals);
 
-        // Convert the Set back to an array
-        const randomCapitals = Array.from(uniqueCapitals);
-
-        return randomCapitals;
-      };
-
-      const randomCities = getRandomCapitals();
-
-      const fetchCityImages = randomCities.map((city) =>
-        axios.get(`https://api.pexels.com/v1/search`, {
-          headers: {
-            Authorization: process.env.REACT_APP_PEXELS_API_KEY,
-          },
-          params: {
-            per_page: 1,
-            query: encodeURIComponent(city),
-          },
-        })
-      );
-
-      // Wait for all API requests to finish using Promise.all()
-      const cityImagesResponses = await Promise.all(fetchCityImages);
-
-      const cityImages = cityImagesResponses.map(
-        (response) => response.data.photos[0].src.original
-      );
-
-      const citiesWithImages = randomCities.map((city, index) => ({
-        city,
-        image: cityImages[index],
-      }));
-
-      setData(citiesWithImages);
+      return randomCapitals;
     };
-    getCountriesAndCities();
-  }, []);
+
+    const randomCities = getRandomCapitals();
+
+    const fetchCityImages = randomCities.map((city) =>
+      axios.get(`https://api.pexels.com/v1/search`, {
+        headers: {
+          Authorization: process.env.REACT_APP_PEXELS_API_KEY,
+        },
+        params: {
+          per_page: 1,
+          query: encodeURIComponent(city),
+        },
+      })
+    );
+
+    // Wait for all API requests to finish using Promise.all()
+    const cityImagesResponses = await Promise.all(fetchCityImages);
+
+    const cityImages = cityImagesResponses.map(
+      (response) => response.data.photos[0].src.original
+    );
+
+    const citiesWithImages = randomCities.map((city, index) => ({
+      city,
+      image: cityImages[index],
+    }));
+
+    // setData(citiesWithImages);
+
+    return citiesWithImages;
+  };
+  const { isLoading, error, data } = useQuery("cities", getCountriesAndCities);
+
+  const navigate = useNavigate();
+
+  if (error) return <div>Error</div>;
+  if (isLoading)
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100vh",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+
   return (
     <div className="App">
       <Typography variant="h5" sx={{ textAlign: "center", mt: 2 }}>
@@ -129,10 +147,20 @@ function App() {
               >
                 <img src={el.image} />
               </Box>
-              <Typography fontWeight={500} fontSize={18}>{el.city}</Typography>
+              <Typography fontWeight={500} fontSize={18}>
+                {el.city}
+              </Typography>
             </Box>
           );
         })}
+      </Box>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <div>
+          <Button onClick={() => navigate("/quiz")} variant="contained">
+            Start game
+          </Button>
+        </div>
       </Box>
     </div>
   );
