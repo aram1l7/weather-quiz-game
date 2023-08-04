@@ -95,7 +95,9 @@ function App() {
 
     return citiesWithImages;
   };
-  const { isLoading, error, data } = useQuery("cities", getCountriesAndCities);
+  const { isLoading, error, data } = useQuery("cities", getCountriesAndCities, {
+    refetchOnWindowFocus: false,
+  });
 
   const navigate = useNavigate();
 
