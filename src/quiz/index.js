@@ -30,7 +30,7 @@ function Quiz() {
     setDisabled(true);
 
     const { data } =
-      await axios.get(`http://api.openweathermap.org/geo/1.0/direct?q=${values.city}&appid=${process.env.REACT_APP_WEATHER_API_KEY}
+      await axios.get(`https://api.openweathermap.org/geo/1.0/direct?q=${values.city}&appid=${process.env.REACT_APP_WEATHER_API_KEY}
     `);
     if (data[0] && data[0].lat && data[0].lon) {
       const { data: tempData } =
