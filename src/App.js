@@ -119,7 +119,16 @@ function App() {
       <Typography variant="h5" sx={{ textAlign: "center", mt: 2 }}>
         Guess temperature (C)
       </Typography>
-      <Box sx={{ display: "flex", mt: 3, gap: 2, px: 4 }}>
+      <Box
+        sx={{
+          display: "flex",
+          mt: 3,
+          gap: 2,
+          px: 4,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
         {data.map((el) => {
           return (
             <Box

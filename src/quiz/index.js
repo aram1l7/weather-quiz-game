@@ -2,7 +2,7 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Quiz() {
   const queryClient = useQueryClient();
@@ -52,11 +52,9 @@ function Quiz() {
         setCurrentStage((prev) => (prev === 5 ? 5 : prev + 1));
 
         setRealAnswer(null);
-      }, 4000);
+      }, 3000);
     }
   };
-
-  console.log(answers, "answers");
 
   return (
     <Box
@@ -67,72 +65,111 @@ function Quiz() {
         placeItems: "center",
       }}
     >
-      <Box sx={{ position: "absolute", top: "20px", left: "20px" }}>
-        <Typography color={"primary"} fontWeight={500} fontSize={20}>
-          {currentStage + 1} / 5
-        </Typography>
-      </Box>
-      {cities && cities[currentStage] && (
+      {currentStage === 5 ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            justifyContent: "center",
+            alignItems: "center",
+            height: "80vh",
+          }}
+        >
+          <Typography
+            fontSize={20}
+            fontWeight={500}
+            sx={{ color: answers.length >= 3 ? "green" : "red", mt: 4 }}
+          >
+            {answers.length >= 3 ? "Congrats, you won" : "You lost, try again"}
+          </Typography>
+          <Button variant="contained" onClick={() => navigate("/")}>
+            Try again
+          </Button>
+        </Box>
+      ) : (
         <>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              padding: "1rem",
-              borderRadius: "10px",
-              mt: 2,
-              boxShadow:
-                "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
+              position: "absolute",
+              bottom: { xs: "20px", md: "unset" },
+              top: { xs: "unset", md: "20px" },
+              left: "20px",
             }}
           >
-            <Box
-              sx={{
-                width: "400px",
-                height: "400px",
-                "& > img": {
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                },
-              }}
-            >
-              <img src={cities[currentStage].image} />
-            </Box>
-            <Typography fontWeight={500} fontSize={18}>
-              {cities[currentStage].city}
+            <Typography color={"primary"} fontWeight={500} fontSize={20}>
+              {currentStage + 1} / 5
             </Typography>
+          </Box>
+          {cities && cities[currentStage] && (
+            <>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                  padding: "1rem",
+                  borderRadius: "10px",
+                  mt: 2,
+                  boxShadow:
+                    "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: {
+                      xs: "300px",
+                      md: "400px",
+                    },
+                    height: {
+                      xs: "300px",
+                      md: "400px",
+                    },
+                    "& > img": {
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    },
+                  }}
+                >
+                  <img src={cities[currentStage].image} />
+                </Box>
+                <Typography fontWeight={500} fontSize={18}>
+                  {cities[currentStage].city}
+                </Typography>
 
-            <TextField
-              required
-              sx={{ mt: 2 }}
-              label="Enter temperature (Celsius)"
-              type="number"
-              value={userAnswer}
-              InputProps={{ inputProps: { min: 0, max: 100 } }}
-              onChange={(e) => {
-                setError(null);
-                setUserAnswer(e.target.value);
-              }}
-              error={!!error}
-              helperText={error}
-            />
-          </Box>
-          {realAnswer && (
-            <Box sx={{ my: 2 }}>
-              <Typography fontSize={20} fontWeight={500} color={"primary"}>
-                The real answer is {realAnswer}
-              </Typography>
-            </Box>
+                <TextField
+                  required
+                  sx={{ mt: 2 }}
+                  label="Enter temperature (Celsius)"
+                  type="number"
+                  value={userAnswer}
+                  InputProps={{ inputProps: { min: 0, max: 100 } }}
+                  onChange={(e) => {
+                    setError(null);
+                    setUserAnswer(e.target.value);
+                  }}
+                  error={!!error}
+                  helperText={error}
+                />
+              </Box>
+              {realAnswer && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography fontSize={18} fontWeight={500} color={"primary"}>
+                    The real answer is {realAnswer}
+                  </Typography>
+                </Box>
+              )}
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  disabled={!!realAnswer || disabled}
+                  onClick={() => checkRealTemperature(cities[currentStage])}
+                >
+                  Submit
+                </Button>
+              </Box>
+            </>
           )}
-          <Box sx={{ mt: 2 }}>
-            <Button
-              disabled={!!realAnswer || disabled}
-              onClick={() => checkRealTemperature(cities[currentStage])}
-            >
-              Submit
-            </Button>
-          </Box>
         </>
       )}
     </Box>
